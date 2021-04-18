@@ -15,10 +15,10 @@ def export_data_to_csv(collection):
         date.append(data["date"])
 
     df = pd.DataFrame(np.column_stack([name, station, date]), columns=['name', 'station', 'date'])
-    df.to_csv('data.csv')
+    df.to_csv('data/data.csv')
 
 if __name__ == "__main__":
-    cred = credentials.Certificate('key.json')
+    cred = credentials.Certificate('exporter/key.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
 
