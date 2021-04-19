@@ -10,7 +10,7 @@ def seperate_songname(string):
         return split[0]
 
 if __name__ == "__main__":
-    df = pd.read_csv('data/data.csv', index_col=0)
+    df = pd.read_csv('data/data.csv')
     
     df["name"] = df["name"].apply(lambda row: row.split('|')[0])
     df["artist"] = df["name"].apply(lambda row: row.split('-')[0])
