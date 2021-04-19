@@ -61,16 +61,21 @@ def audio_features(track, idx, spotify_artist, spotify_song, scraped_artist, scr
 if __name__ == "__main__":
     df = pd.read_csv('data/wrangled.csv', index_col=0)
     uri = []
+    logger = []
     pattern = re.compile('[\W_]+')
 
     for idx, row in df.iterrows():
         try:
             print(idx, row["artist"], row["song"])
+            if {'artist': row["artist"], 'song': row['song']} in logger:
+                print('Song already processed : ')
+                continue
             searchResults = sp.search(q="track:" + row["song"], type="track")
             if len(searchResults["tracks"]["items"]) >= 1:
                 for song in searchResults["tracks"]["items"]:
                     if pattern.sub('', song["album"]["artists"][0]["name"].lower()) == pattern.sub('', row["artist"].lower()):
                         uri.append(audio_features(song["uri"], idx, song["album"]["artists"][0]["name"], song["name"], row["artist"], row["song"]))
+                        logger.append({'artist': row["artist"], 'song': row['song']})
                         break
         except:
             pass
