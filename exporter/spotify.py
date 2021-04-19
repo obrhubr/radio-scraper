@@ -15,6 +15,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager) #spo
 def audio_features(track, idx, spotify_artist, spotify_song, scraped_artist, scraped_song):
     try:
         features = {
+            'uri': '',
             'acousticness': 0, 
             'danceability': 0, 
             'energy': 0, 
@@ -50,24 +51,29 @@ def audio_features(track, idx, spotify_artist, spotify_song, scraped_artist, scr
 
         features["artist"] = scraped_artist
         features["song"] = scraped_song
+
+        features["uri"] = track
     except:
         return {}
 
     return features
 
 if __name__ == "__main__":
-    df = pd.read_csv('data/wrangled.csv', index_col=0).head()
+    df = pd.read_csv('data/wrangled.csv', index_col=0)
     uri = []
     pattern = re.compile('[\W_]+')
 
     for idx, row in df.iterrows():
-        print(idx, row["artist"], row["song"])
-        searchResults = sp.search(q="track:" + row["song"], type="track")
-        if len(searchResults["tracks"]["items"]) >= 1:
-            for song in searchResults["tracks"]["items"]:
-                if pattern.sub('', song["album"]["artists"][0]["name"].lower()) == pattern.sub('', row["artist"].lower()):
-                    uri.append(audio_features(song["uri"], idx, song["album"]["artists"][0]["name"], song["name"], row["artist"], row["song"]))
-                    break
+        try:
+            print(idx, row["artist"], row["song"])
+            searchResults = sp.search(q="track:" + row["song"], type="track")
+            if len(searchResults["tracks"]["items"]) >= 1:
+                for song in searchResults["tracks"]["items"]:
+                    if pattern.sub('', song["album"]["artists"][0]["name"].lower()) == pattern.sub('', row["artist"].lower()):
+                        uri.append(audio_features(song["uri"], idx, song["album"]["artists"][0]["name"], song["name"], row["artist"], row["song"]))
+                        break
+        except:
+            pass
                     
 
     df = pd.merge(df, pd.DataFrame(uri), on=['artist','song'])
